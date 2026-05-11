@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>ARES FINANCE — международные платежи</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #05070f;
+            color: #eceef5;
+            line-height: 1.5;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+
+        /* кастомный скролл */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f1222;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ff9f4a;
+            border-radius: 10px;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* кнопки */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 32px;
+            font-weight: 600;
+            font-size: 15px;
+            border-radius: 40px;
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            cursor: pointer;
+            text-decoration: none;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ffffff, #fde3c0);
+            color: #0a0c15;
+            box-shadow: 0 5px 15px rgba(255, 159, 74, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.02) translateY(-2px);
+            box-shadow: 0 12px 28px rgba(255, 159, 74, 0.35);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
+            color: #eef2ff;
+        }
+
+        .btn-outline:hover {
+            border-color: #ff9f4a;
+            background: rgba(255, 159, 74, 0.08);
+            transform: translateY(-2px);
+        }
+
+        /* хедер */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(5, 7, 15, 0.82);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+        }
+
+        .logo {
+            font-size: 26px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff, #ffb86c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 36px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            font-weight: 500;
+            color: #cdd6f4;
+            transition: color 0.2s;
+            font-size: 15px;
+        }
+
+        .nav-links a:hover {
+            color: #ffb86c;
+        }
+
+        .burger {
+            display: none;
+            font-size: 26px;
+            cursor: pointer;
+            color: #ffb86c;
+        }
+
+        /* hero */
+        .hero {
+            padding: 120px 0 100px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -30%;
+            right: -20%;
+            width: 80%;
+            height: 120%;
+            background: radial-gradient(circle, rgba(255,159,74,0.08) 0%, rgba(5,7,15,0) 70%);
+            pointer-events: none;
+        }
+
+        .hero-grid {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 70px;
+            flex-wrap: wrap;
+        }
+
+        .hero-content {
+            flex: 1;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255, 159, 74, 0.12);
+            color: #ffb86c;
+            font-weight: 600;
+            font-size: 13px;
+            padding: 6px 16px;
+            border-radius: 40px;
+            margin-bottom: 28px;
+            border: 1px solid rgba(255,159,74,0.3);
+            backdrop-filter: blur(4px);
+        }
+
+        .hero-title {
+            font-size: 60px;
+            font-weight: 800;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #ffffff, #cdd9ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 24px;
+        }
+
+        .hero-desc {
+            font-size: 18px;
+            color: #9aa4bf;
+            margin-bottom: 40px;
+            max-width: 520px;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 48px;
+            margin-bottom: 48px;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 800;
+            color: #ffb86c;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #7882a3;
+        }
+
+        .hero-image {
+            flex: 1;
+            text-align: center;
+        }
+
+        .hero-image img {
+            max-width: 100%;
+            border-radius: 48px;
+            box-shadow: 0 30px 50px -25px rgba(0,0,0,0.5);
+            transition: transform 0.5s ease;
+        }
+
+        .hero-image img:hover {
+            transform: scale(1.02);
+        }
+
+        /* общие секции */
+        .section {
+            padding: 100px 0;
+        }
+
+        .section-title {
+            font-size: 44px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ffffff, #c7d2fe);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: #9aa4bf;
+            max-width: 600px;
+            margin: 0 auto 60px;
+            font-size: 18px;
+        }
+
+        /* карточки услуг */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 32px;
+        }
+
+        .service-card {
+            background: rgba(18, 22, 40, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 40px;
+            padding: 38px 28px;
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        .service-card:hover {
+            transform: translateY(-12px);
+            border-color: rgba(255, 159, 74, 0.4);
+            background: rgba(25, 30, 55, 0.7);
+        }
+
+        .service-icon {
+            font-size: 48px;
+            color: #ffb86c;
+            margin-bottom: 24px;
+        }
+
+        .service-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .service-text {
+            color: #a0a9c5;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        /* галерея с градиентом */
+        .gallery {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .gallery-item {
+            position: relative;
+            flex: 1;
+            min-width: 260px;
+            border-radius: 36px;
+            overflow: hidden;
+            transition: transform 0.4s ease;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-8px);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 320px;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.6s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .gradient-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(145deg, rgba(255,159,74,0.2) 0%, rgba(5,7,15,0.85) 90%);
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        /* этапы */
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            background: rgba(18, 22, 40, 0.5);
+            backdrop-filter: blur(8px);
+            border-radius: 44px;
+            padding: 40px 20px;
+            border: 1px solid rgba(255,255,255,0.03);
+            transition: all 0.3s;
+        }
+
+        .step:hover {
+            border-color: rgba(255,159,74,0.3);
+            transform: translateY(-6px);
+        }
+
+        .step-number {
+            width: 56px;
+            height: 56px;
+            background: rgba(255, 159, 74, 0.15);
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            font-weight: 800;
+            color: #ffb86c;
+            margin: 0 auto 20px;
+        }
+
+        /* Цитата / отзыв */
+        .testimonial {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 24px;
+            font-weight: 500;
+            line-height: 1.4;
+            background: linear-gradient(135deg, #ffffff, #cbd5ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            padding: 20px 0;
+        }
+
+        .testimonial-author {
+            font-size: 16px;
+            color: #ffb86c;
+            margin-top: 20px;
+        }
+
+        /* партнёры */
+        .partners {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 40px;
+        }
+
+        .partner i {
+            font-size: 42px;
+            color: #4c567a;
+            transition: color 0.2s, transform 0.2s;
+        }
+
+        .partner:hover i {
+            color: #ffb86c;
+            transform: scale(1.05);
+        }
+
+        /* блок контактов (только соцсети) */
+        .contacts-block {
+            text-align: center;
+            background: rgba(18, 22, 40, 0.5);
+            backdrop-filter: blur(12px);
+            border-radius: 48px;
+            padding: 48px 32px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-top: 32px;
+        }
+
+        .social-link {
+            font-size: 32px;
+            color: #cdd6f4;
+            transition: all 0.2s;
+        }
+
+        .social-link:hover {
+            color: #ffb86c;
+            transform: translateY(-4px);
+        }
+
+        /* футер */
+        footer {
+            background: #03050b;
+            padding: 48px 0 32px;
+            border-top: 1px solid rgba(255,255,255,0.03);
+            margin-top: 40px;
+        }
+
+        .footer-text {
+            text-align: center;
+            font-size: 13px;
+            color: #5b6588;
+        }
+
+        /* кнопка вверх */
+        .scroll-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 52px;
+            height: 52px;
+            background: #ffb86c;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0a0c15;
+            font-size: 24px;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 99;
+            box-shadow: 0 4px 15px rgba(255, 184, 108, 0.3);
+            border: none;
+        }
+
+        .scroll-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .scroll-top:hover {
+            transform: translateY(-5px);
+            background: #ffa347;
+        }
+
+        /* анимации появления */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.7s cubic-bezier(0.2, 0.9, 0.4, 1.1), transform 0.7s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        .fade-up.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* адаптив */
+        @media (max-width: 1024px) {
+            .hero-title { font-size: 48px; }
+            .section-title { font-size: 36px; }
+            .hero-stats { gap: 30px; }
+        }
+
+        @media (max-width: 900px) {
+            .nav-links { display: none; }
+            .burger { display: block; }
+            .hero-grid { flex-direction: column; text-align: center; }
+            .hero-desc { margin-left: auto; margin-right: auto; }
+            .hero-stats { justify-content: center; }
+            .steps { flex-direction: column; }
+            .gallery { flex-direction: column; align-items: center; }
+            .gallery-item { max-width: 400px; width: 100%; }
+        }
+
+        @media (max-width: 600px) {
+            .hero-title { font-size: 38px; }
+            .section-title { font-size: 30px; }
+            .container { padding: 0 20px; }
+            .service-card { padding: 28px 20px; }
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            width: 100%;
+            background: rgba(5, 7, 15, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 30px;
+            transform: translateY(-120%);
+            transition: transform 0.3s ease;
+            z-index: 99;
+            border-bottom: 1px solid rgba(255,159,74,0.2);
+        }
+
+        .mobile-menu.active {
+            transform: translateY(0);
+        }
+
+        .mobile-menu a {
+            display: block;
+            color: #eef2ff;
+            text-decoration: none;
+            padding: 14px 0;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <div class="nav-container">
+            <div class="logo">ARES FINANCE</div>
+            <div class="nav-links">
+                <a href="#home">Главная</a>
+                <a href="#services">Услуги</a>
+                <a href="#advantages">Преимущества</a>
+                <a href="#contacts">Контакты</a>
+                <a href="#home" class="btn btn-primary" style="padding: 10px 24px; color: black;">Начать</a>
+            </div>
+            <div class="burger" id="burgerBtn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </div>
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="#home">Главная</a>
+        <a href="#services">Услуги</a>
+        <a href="#advantages">Преимущества</a>
+        <a href="#contacts">Контакты</a>
+        <a href="#home">Начать</a>
+    </div>
+</header>
+
+<main>
+    <!-- hero -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-grid">
+                <div class="hero-content">
+                    <div class="hero-badge">⚡️ Мгновенные международные платежи</div>
+                    <h1 class="hero-title">Ваши деньги <br>в движении</h1>
+                    <p class="hero-desc">128 стран, 50 валют, полная прозрачность. Оплата инвойсов, возврат выручки, переводы — под ключ.</p>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <div class="stat-number">128</div>
+                            <div class="stat-label">стран</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">50</div>
+                            <div class="stat-label">валют</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">24ч</div>
+                            <div class="stat-label">средний срок</div>
+                        </div>
+                    </div>
+                    <div>
+                        <a href="#contacts" class="btn btn-primary">Связаться →</a>
+                        <a href="#services" class="btn btn-outline" style="margin-left: 16px;">Узнать больше</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="global finance" style="border-radius: 40px;">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- услуги -->
+    <section class="section" id="services">
+        <div class="container">
+            <h2 class="section-title fade-up">Финансовые решения</h2>
+            <p class="section-subtitle fade-up">Для бизнеса и частных лиц, без скрытых комиссий</p>
+            <div class="services-grid">
+                <div class="service-card fade-up">
+                    <div class="service-icon"><i class="fas fa-globe-americas"></i></div>
+                    <h3 class="service-title">Международные переводы</h3>
+                    <p class="service-text">SWIFT, SEPA, на карты и счета. Фиксация курса до 24 часов.</p>
+                </div>
+                <div class="service-card fade-up">
+                    <div class="service-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                    <h3 class="service-title">Оплата инвойсов</h3>
+                    <p class="service-text">Прямые платежи поставщикам с полным пакетом документов.</p>
+                </div>
+                <div class="service-card fade-up">
+                    <div class="service-icon"><i class="fas fa-exchange-alt"></i></div>
+                    <h3 class="service-title">Возврат выручки</h3>
+                    <p class="service-text">Легальный возврат валютной выручки в РФ от 1,7%.</p>
+                </div>
+                <div class="service-card fade-up">
+                    <div class="service-icon"><i class="fas fa-yen-sign"></i></div>
+                    <h3 class="service-title">Платежи в Китай</h3>
+                    <p class="service-text">Alipay, WeChat Pay, банки в CNY. Без открытия счёта.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- галерея с градиентом -->
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title fade-up">Под контролем экспертов</h2>
+            <div class="gallery">
+                <div class="gallery-item fade-up">
+                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="team">
+                    <div class="gradient-overlay"></div>
+                </div>
+                <div class="gallery-item fade-up">
+                    <img src="https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="trading">
+                    <div class="gradient-overlay"></div>
+                </div>
+                <div class="gallery-item fade-up">
+                    <img src="https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="global">
+                    <div class="gradient-overlay"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- преимущества / этапы -->
+    <section class="section" id="advantages">
+        <div class="container">
+            <h2 class="section-title fade-up">Прозрачный процесс</h2>
+            <div class="steps">
+                <div class="step fade-up">
+                    <div class="step-number">1</div>
+                    <h4>Заявка</h4>
+                    <p>Вы оставляете заявку в Telegram или на сайте</p>
+                </div>
+                <div class="step fade-up">
+                    <div class="step-number">2</div>
+                    <h4>Фиксация курса</h4>
+                    <p>Менеджер подбирает лучший маршрут</p>
+                </div>
+                <div class="step fade-up">
+                    <div class="step-number">3</div>
+                    <h4>Перевод</h4>
+                    <p>Вы отправляете средства на наш счёт</p>
+                </div>
+                <div class="step fade-up">
+                    <div class="step-number">4</div>
+                    <h4>Поступление</h4>
+                    <p>Получатель видит деньги в течение суток</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- отзыв / цитата -->
+    <section class="section">
+        <div class="container">
+            <div class="testimonial fade-up">
+                «Прозрачность, скорость и индивидуальный подход — <br>это то, за что мы ценим ARES FINANCE»
+                <div class="testimonial-author">— CEO импортной компании, Виктор Баринов</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- партнёры -->
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title fade-up">Надёжные партнёры</h2>
+            <div class="partners">
+                <div class="partner fade-up"><i class="fab fa-cc-visa"></i></div>
+                <div class="partner fade-up"><i class="fab fa-cc-mastercard"></i></div>
+                <div class="partner fade-up"><i class="fas fa-university"></i></div>
+                <div class="partner fade-up"><i class="fab fa-bitcoin"></i></div>
+                <div class="partner fade-up"><i class="fab fa-weixin"></i></div>
+                <div class="partner fade-up"><i class="fab fa-alipay"></i></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- контакты (только телеграм) -->
+    <section class="section" id="contacts">
+        <div class="container">
+            <div class="contacts-block fade-up">
+                <h2 class="section-title" style="font-size: 36px; margin-bottom: 16px;">Связь с нами</h2>
+                <p style="color: #9aa4bf;">Напишите нам в Telegram — ответим в течение часа</p>
+                <div class="social-links">
+                    <a href="https://t.me/ares_max" target="_blank" class="social-link"><i class="fab fa-telegram"></i> @ares_max</a>
+                    <a href="https://t.me/ares_finance_bot" target="_blank" class="social-link"><i class="fab fa-telegram-plane"></i> @ares_finance_bot</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="container">
+        <div class="footer-text">
+            © 2026 ARES FINANCE. Международные финансовые решения.
+        </div>
+    </div>
+</footer>
+
+<button class="scroll-top" id="scrollTopBtn"><i class="fas fa-arrow-up"></i></button>
+
+<script>
+    // бургер-меню
+    const burger = document.getElementById('burgerBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    burger.addEventListener('click', () => {
+        mobileMenu.classList.toggle('active');
+    });
+    document.querySelectorAll('.mobile-menu a').forEach(link => {
+        link.addEventListener('click', () => mobileMenu.classList.remove('active'));
+    });
+
+    // анимация при скролле
+    const fadeElements = document.querySelectorAll('.fade-up');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
+            }
+        });
+    }, { threshold: 0.15, rootMargin: '0px 0px -30px 0px' });
+    fadeElements.forEach(el => observer.observe(el));
+
+    // кнопка вверх
+    const scrollBtn = document.getElementById('scrollTopBtn');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 500) {
+            scrollBtn.classList.add('show');
+        } else {
+            scrollBtn.classList.remove('show');
+        }
+    });
+    scrollBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // плавный скролл для якорей
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            if (href === '#') return;
+            const target = document.querySelector(href);
+            if (target) {
+                e.preventDefault();
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+</script>
+</body>
+</html>
