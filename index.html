@@ -42,6 +42,19 @@
             padding: 0 24px;
         }
 
+        /* прогресс-бар */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, #ffb86c, #ff9f4a);
+            z-index: 10000;
+            transition: width 0.1s ease;
+            box-shadow: 0 0 8px #ffb86c;
+        }
+
         /* кнопки */
         .btn {
             display: inline-flex;
@@ -65,7 +78,7 @@
         }
 
         .btn-primary:hover {
-            transform: scale(1.02) translateY(-2px);
+            transform: scale(1.05);
             box-shadow: 0 12px 28px rgba(255, 159, 74, 0.35);
         }
 
@@ -120,10 +133,28 @@
             color: #cdd6f4;
             transition: color 0.2s;
             font-size: 15px;
+            position: relative;
+            padding-bottom: 4px;
         }
 
-        .nav-links a:hover {
+        /* подчёркивание для обычных ссылок, кроме кнопки */
+        .nav-links a:not(.btn-primary)::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #ffb86c;
+            transition: width 0.2s ease;
+        }
+
+        .nav-links a:not(.btn-primary):hover {
             color: #ffb86c;
+        }
+
+        .nav-links a:not(.btn-primary):hover::after {
+            width: 100%;
         }
 
         .burger {
@@ -230,6 +261,7 @@
         /* общие секции */
         .section {
             padding: 100px 0;
+            position: relative;
         }
 
         .section-title {
@@ -291,6 +323,20 @@
             line-height: 1.5;
         }
 
+        /* соединительная линия между секциями (услуги -> галерея) */
+        .section-connector {
+            width: 2px;
+            height: 80px;
+            background: linear-gradient(180deg, #ffb86c, transparent);
+            margin: -40px auto 40px;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+
+        .section-connector.visible {
+            opacity: 0.6;
+        }
+
         /* галерея с градиентом */
         .gallery {
             display: flex;
@@ -333,13 +379,19 @@
             transition: opacity 0.3s;
         }
 
-        /* этапы */
+        /* этапы с линиями */
+        .steps-wrapper {
+            position: relative;
+            margin: 40px 0 20px;
+        }
+
         .steps {
             display: flex;
             justify-content: space-between;
             gap: 30px;
             flex-wrap: wrap;
-            margin-top: 40px;
+            position: relative;
+            z-index: 2;
         }
 
         .step {
@@ -370,6 +422,25 @@
             font-weight: 800;
             color: #ffb86c;
             margin: 0 auto 20px;
+        }
+
+        /* горизонтальная соединительная линия между этапами */
+        .steps-connector {
+            position: absolute;
+            top: 40%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, #ffb86c, #ffb86c, #2a2f4e);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+            z-index: 0;
+            opacity: 0.6;
+        }
+
+        .steps-connector.active {
+            transform: scaleX(1);
         }
 
         /* Цитата / отзыв */
@@ -516,6 +587,8 @@
             .steps { flex-direction: column; }
             .gallery { flex-direction: column; align-items: center; }
             .gallery-item { max-width: 400px; width: 100%; }
+            .steps-connector { display: none; }
+            .section-connector { display: none; }
         }
 
         @media (max-width: 600px) {
@@ -554,6 +627,8 @@
     </style>
 </head>
 <body>
+
+<div class="progress-bar" id="progressBar"></div>
 
 <header>
     <div class="container">
@@ -645,6 +720,9 @@
         </div>
     </section>
 
+    <!-- соединительная линия между услугами и галереей -->
+    <div class="section-connector" id="sectionConnector"></div>
+
     <!-- галерея с градиентом -->
     <section class="section">
         <div class="container">
@@ -666,30 +744,33 @@
         </div>
     </section>
 
-    <!-- преимущества / этапы -->
+    <!-- преимущества / этапы с линиями -->
     <section class="section" id="advantages">
         <div class="container">
             <h2 class="section-title fade-up">Прозрачный процесс</h2>
-            <div class="steps">
-                <div class="step fade-up">
-                    <div class="step-number">1</div>
-                    <h4>Заявка</h4>
-                    <p>Вы оставляете заявку в Telegram или на сайте</p>
-                </div>
-                <div class="step fade-up">
-                    <div class="step-number">2</div>
-                    <h4>Фиксация курса</h4>
-                    <p>Менеджер подбирает лучший маршрут</p>
-                </div>
-                <div class="step fade-up">
-                    <div class="step-number">3</div>
-                    <h4>Перевод</h4>
-                    <p>Вы отправляете средства на наш счёт</p>
-                </div>
-                <div class="step fade-up">
-                    <div class="step-number">4</div>
-                    <h4>Поступление</h4>
-                    <p>Получатель видит деньги в течение суток</p>
+            <div class="steps-wrapper">
+                <div class="steps-connector" id="stepsConnector"></div>
+                <div class="steps">
+                    <div class="step fade-up">
+                        <div class="step-number">1</div>
+                        <h4>Заявка</h4>
+                        <p>Вы оставляете заявку в Telegram или на сайте</p>
+                    </div>
+                    <div class="step fade-up">
+                        <div class="step-number">2</div>
+                        <h4>Фиксация курса</h4>
+                        <p>Менеджер подбирает лучший маршрут</p>
+                    </div>
+                    <div class="step fade-up">
+                        <div class="step-number">3</div>
+                        <h4>Перевод</h4>
+                        <p>Вы отправляете средства на наш счёт</p>
+                    </div>
+                    <div class="step fade-up">
+                        <div class="step-number">4</div>
+                        <h4>Поступление</h4>
+                        <p>Получатель видит деньги в течение суток</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -746,6 +827,15 @@
 <button class="scroll-top" id="scrollTopBtn"><i class="fas fa-arrow-up"></i></button>
 
 <script>
+    // прогресс-бар
+    const progressBar = document.getElementById('progressBar');
+    window.addEventListener('scroll', () => {
+        const winScroll = document.documentElement.scrollTop;
+        const height = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (winScroll / height) * 100;
+        progressBar.style.width = scrolled + '%';
+    });
+
     // бургер-меню
     const burger = document.getElementById('burgerBtn');
     const mobileMenu = document.getElementById('mobileMenu');
@@ -756,7 +846,7 @@
         link.addEventListener('click', () => mobileMenu.classList.remove('active'));
     });
 
-    // анимация при скролле
+    // анимация при скролле (fade-up)
     const fadeElements = document.querySelectorAll('.fade-up');
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -766,6 +856,52 @@
         });
     }, { threshold: 0.15, rootMargin: '0px 0px -30px 0px' });
     fadeElements.forEach(el => observer.observe(el));
+
+    // соединительная линия между этапами
+    const stepsConnector = document.getElementById('stepsConnector');
+    const stepsWrapper = document.querySelector('.steps-wrapper');
+    if (stepsConnector && stepsWrapper) {
+        const lineObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    stepsConnector.classList.add('active');
+                } else {
+                    stepsConnector.classList.remove('active');
+                }
+            });
+        }, { threshold: 0.4 });
+        lineObserver.observe(stepsWrapper);
+    }
+
+    // соединительная линия между секциями (услуги -> галерея)
+    const sectionConnector = document.getElementById('sectionConnector');
+    const serviceSection = document.getElementById('services');
+    if (sectionConnector && serviceSection) {
+        const connectorObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && entry.intersectionRatio > 0.2) {
+                    sectionConnector.classList.add('visible');
+                } else {
+                    sectionConnector.classList.remove('visible');
+                }
+            });
+        }, { threshold: 0.2 });
+        // наблюдаем за секцией услуг, но линия появляется при скролле между секциями
+        // проще: показываем линию, когда достигли середины между услугами и галереей
+        const gallerySection = document.querySelector('.gallery')?.closest('.section');
+        if (gallerySection) {
+            const midObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        sectionConnector.classList.add('visible');
+                    } else {
+                        sectionConnector.classList.remove('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+            midObserver.observe(gallerySection);
+        }
+    }
 
     // кнопка вверх
     const scrollBtn = document.getElementById('scrollTopBtn');
