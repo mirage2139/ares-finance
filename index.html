@@ -1123,29 +1123,41 @@ async function loadRates() {
             let rowsHtml = '';
 
             if (source === 'CBR') {
-                // ЦБ РФ: основные валюты в строку, остальные — сеткой
-                const cbrPairs = items.filter(i => i.pair && i.value);
-                if (cbrPairs.length) {
-                    const mainCurrencies = ['USD/RUB', 'EUR/RUB', 'CNY/RUB'];
-                    const mainItems = cbrPairs.filter(p => mainCurrencies.includes(p.pair));
-                    const otherItems = cbrPairs.filter(p => !mainCurrencies.includes(p.pair));
-                    
-                    if (mainItems.length) {
-                        rowsHtml += `<div class="rate-row"><div class="rate-name">Основные</div><div class="rate-value">${mainItems.map(p => `${p.pair.split('/')[0]} ${formatRateValue(p.pair, p.value)}`).join(' · ')}</div></div>`;
-                    }
-                    if (otherItems.length) {
-                        const gridHtml = otherItems.map(p => `
-                            <div class="cbr-item">
-                                <span class="cbr-currency">${p.pair.split('/')[0]}</span>
-                                <span class="cbr-rate">${formatRateValue(p.pair, p.value)}</span>
-                            </div>
-                        `).join('');
-                        rowsHtml += `<div class="cbr-grid">${gridHtml}</div>`;
-                    }
-                } else {
-                    rowsHtml = '<div class="rate-row">Нет данных</div>';
-                }
-            } else {
+    const cbrPairs = items.filter(i => i.pair && i.value);
+    if (cbrPairs.length) {
+        // Основные валюты (USD, EUR, CNY) – выводим как обычные строки
+        const mainCurrencies = ['USD/RUB', 'EUR/RUB', 'CNY/RUB'];
+        const mainItems = cbrPairs.filter(p => mainCurrencies.includes(p.pair));
+        const otherItems = cbrPairs.filter(p => !mainCurrencies.includes(p.pair));
+        
+        // Основные – построчно (как в других карточках)
+        for (const rate of mainItems) {
+            let pairDisplay = rate.pair.replace('USD/RUB', '$/₽')
+                                       .replace('EUR/RUB', '€/₽')
+                                       .replace('CNY/RUB', '¥/₽');
+            const valueDisplay = formatRateValue(rate.pair, rate.value);
+            rowsHtml += `
+                <div class="rate-row">
+                    <div class="rate-name">${pairDisplay}</div>
+                    <div class="rate-value">${valueDisplay}</div>
+                </div>
+            `;
+        }
+        
+        // Остальные валюты – сеткой
+        if (otherItems.length) {
+            const gridHtml = otherItems.map(p => `
+                <div class="cbr-item">
+                    <span class="cbr-currency">${p.pair.split('/')[0]}</span>
+                    <span class="cbr-rate">${formatRateValue(p.pair, p.value)}</span>
+                </div>
+            `).join('');
+            rowsHtml += `<div class="cbr-grid">${gridHtml}</div>`;
+        }
+    } else {
+        rowsHtml = '<div class="rate-row">Нет данных</div>';
+    }
+} else {
                 // Обычное отображение построчно
                 for (const rate of items) {
                     if (!rate.pair) continue;
