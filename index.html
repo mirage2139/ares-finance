@@ -1102,9 +1102,9 @@ async function loadRates() {
                     const otherValues = cbrPairs.filter(p => !mainCurrencies.includes(p.pair))
                                                 .map(p => `${p.pair.split('/')[0]} ${formatRateValue(p.pair, p.value)}`)
                                                 .join(' · ');
-                    rowsHtml = `<div class="rate-row"><div class="rate-name">Основные</div><div class="rate-value">${mainValues}</div></div>`;
+                    rowsHtml = `<div class="rate-row"><div class="rate-name"></div><div class="rate-value">${mainValues}</div></div>`;
                     if (otherValues) {
-                        rowsHtml += `<div class="rate-row"><div class="rate-name">Прочие</div><div class="rate-value">${otherValues}</div></div>`;
+                        rowsHtml += `<div class="rate-row"><div class="rate-name"></div><div class="rate-value">${otherValues}</div></div>`;
                     }
                 } else {
                     rowsHtml = '<div class="rate-row">Нет данных</div>';
