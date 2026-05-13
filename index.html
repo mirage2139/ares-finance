@@ -808,6 +808,33 @@
     color: #ffb86c;
     margin-left: 8px;
 }
+/* Сетка для ЦБ РФ */
+.cbr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px 16px;
+    margin-top: 12px;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.cbr-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 13px;
+}
+
+.cbr-currency {
+    font-weight: 500;
+    color: #cdd6f4;
+}
+
+.cbr-rate {
+    font-weight: 600;
+    color: #ffb86c;
+    font-family: monospace;
+}
     </style>
 </head>
 <body>
@@ -1045,7 +1072,6 @@ async function loadRates() {
             grouped[source].push(rate);
         }
 
-        // Порядок источников
         const order = ['MoscowExchange', 'SPBExchange', 'Rapira', 'Binance', 'Bybit', 'Investing', 'Forex', 'CBR', 'other'];
         const sortedSources = Object.keys(grouped).sort((a, b) => {
             const ia = order.indexOf(a);
@@ -1056,7 +1082,6 @@ async function loadRates() {
             return ia - ib;
         });
 
-        // Метаданные источников (иконки, названия)
         const sourceMeta = {
             'MoscowExchange': { icon: 'fas fa-building', name: 'Москва' },
             'SPBExchange': { icon: 'fas fa-building', name: 'Санкт-Петербург' },
@@ -1069,7 +1094,6 @@ async function loadRates() {
             'other': { icon: 'fas fa-database', name: 'Другие' }
         };
 
-        // Форматирование значения
         function formatRateValue(pair, value) {
             if (value === null || value === undefined) return 'N/A';
             const num = Number(value);
@@ -1082,7 +1106,14 @@ async function loadRates() {
             return num.toFixed(4);
         }
 
-        // Генерация HTML
+        function getPairDisplay(pair) {
+            return pair.replace('USD/RUB', '$/₽')
+                       .replace('EUR/RUB', '€/₽')
+                       .replace('CNY/RUB', '¥/₽')
+                       .replace('BTC/USDT', '₿/₮')
+                       .replace('ETH/USDT', 'Ξ/₮');
+        }
+
         let cardsHtml = '';
         for (const source of sortedSources) {
             const items = grouped[source];
@@ -1091,34 +1122,34 @@ async function loadRates() {
             const iconHtml = meta.icon ? `<i class="${meta.icon}"></i>` : '<i class="fas fa-chart-line"></i>';
             let rowsHtml = '';
 
-            // Специальная обработка для ЦБ РФ (много пар → компактно)
             if (source === 'CBR') {
+                // ЦБ РФ: основные валюты в строку, остальные — сеткой
                 const cbrPairs = items.filter(i => i.pair && i.value);
                 if (cbrPairs.length) {
                     const mainCurrencies = ['USD/RUB', 'EUR/RUB', 'CNY/RUB'];
-                    const mainValues = cbrPairs.filter(p => mainCurrencies.includes(p.pair))
-                                               .map(p => `${p.pair.split('/')[0]} ${formatRateValue(p.pair, p.value)}`)
-                                               .join(' · ');
-                    const otherValues = cbrPairs.filter(p => !mainCurrencies.includes(p.pair))
-                                                .map(p => `${p.pair.split('/')[0]} ${formatRateValue(p.pair, p.value)}`)
-                                                .join(' · ');
-                    rowsHtml = `<div class="rate-row"><div class="rate-name"></div><div class="rate-value">${mainValues}</div></div>`;
-                    if (otherValues) {
-                        rowsHtml += `<div class="rate-row"><div class="rate-name"></div><div class="rate-value">${otherValues}</div></div>`;
+                    const mainItems = cbrPairs.filter(p => mainCurrencies.includes(p.pair));
+                    const otherItems = cbrPairs.filter(p => !mainCurrencies.includes(p.pair));
+                    
+                    if (mainItems.length) {
+                        rowsHtml += `<div class="rate-row"><div class="rate-name">Основные</div><div class="rate-value">${mainItems.map(p => `${p.pair.split('/')[0]} ${formatRateValue(p.pair, p.value)}`).join(' · ')}</div></div>`;
+                    }
+                    if (otherItems.length) {
+                        const gridHtml = otherItems.map(p => `
+                            <div class="cbr-item">
+                                <span class="cbr-currency">${p.pair.split('/')[0]}</span>
+                                <span class="cbr-rate">${formatRateValue(p.pair, p.value)}</span>
+                            </div>
+                        `).join('');
+                        rowsHtml += `<div class="cbr-grid">${gridHtml}</div>`;
                     }
                 } else {
                     rowsHtml = '<div class="rate-row">Нет данных</div>';
                 }
             } else {
-                // Обычные источники
+                // Обычное отображение построчно
                 for (const rate of items) {
                     if (!rate.pair) continue;
-                    let pairDisplay = rate.pair;
-                    pairDisplay = pairDisplay.replace('USD/RUB', '$/₽')
-                                             .replace('EUR/RUB', '€/₽')
-                                             .replace('CNY/RUB', '¥/₽')
-                                             .replace('BTC/USDT', '₿/₮')
-                                             .replace('ETH/USDT', 'Ξ/₮');
+                    const pairDisplay = getPairDisplay(rate.pair);
                     const valueDisplay = formatRateValue(rate.pair, rate.value);
                     rowsHtml += `
                         <div class="rate-row">
@@ -1128,6 +1159,7 @@ async function loadRates() {
                     `;
                 }
             }
+
             cardsHtml += `
                 <div class="rate-card">
                     <div class="card-header">
