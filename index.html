@@ -651,6 +651,84 @@
             border-bottom: 1px solid rgba(255,255,255,0.05);
             font-size: 16px;
         }
+        .rates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+    margin-top: 40px;
+}
+
+.rate-card {
+    background: rgba(18, 22, 40, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 32px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.rate-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255, 159, 74, 0.4);
+    background: rgba(25, 30, 55, 0.7);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-header i {
+    font-size: 28px;
+    color: #ffb86c;
+}
+
+.card-header h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.rate-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 8px 0;
+    font-size: 15px;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+}
+
+.rate-row:last-child {
+    border-bottom: none;
+}
+
+.rate-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: #cdd6f4;
+}
+
+.rate-value {
+    font-weight: 700;
+    font-family: monospace;
+    font-size: 16px;
+    color: #ffb86c;
+}
+
+.rate-source-badge {
+    font-size: 11px;
+    background: rgba(255, 159, 74, 0.15);
+    padding: 2px 8px;
+    border-radius: 20px;
+    color: #ffb86c;
+    margin-left: 8px;
+}
     </style>
 </head>
 <body>
@@ -738,7 +816,7 @@
         <div class="container">
             <h2 class="section-title fade-up">💱 Курсы валют</h2>
             <p class="section-subtitle fade-up">Актуальные данные из надёжных источников</p>
-            <div id="rates-container" class="rates-list fade-up">
+            <div id="rates-container" class="rates-grid">
                 <div class="loading">Загрузка курсов...</div>
             </div>
         </div>
@@ -865,28 +943,126 @@
     }
 
     // ===================== ЗАГРУЗКА КУРСОВ =====================
-    async function loadRates() {
-        const container = document.getElementById('rates-container');
-        try {
-            const response = await fetch('https://77.239.122.8.nip.io/api/rates?pairs=USD/RUB,EUR/RUB,CNY/RUB,BTC/USDT');
-            const data = await response.json();
-            if (data.rates && data.rates.length) {
-                container.innerHTML = data.rates.map(r => `
-                    <div class="rate-item">
-                        <span class="rate-pair">${r.pair}</span>
-                        <span class="rate-value">${r.value.toFixed(4)}</span>
-                        <span class="rate-source">(${r.source})</span>
-                    </div>
-                `).join('');
-            } else {
-                container.innerHTML = 'Нет данных о курсах';
-            }
-        } catch (err) {
-            container.innerHTML = 'Ошибка загрузки курсов';
-            console.error(err);
+    // ===================== ЗАГРУЗКА КУРСОВ (КИРПИЧИКИ) =====================
+async function loadRates() {
+    const container = document.getElementById('rates-container');
+    if (!container) return;
+    container.innerHTML = '<div class="loading">⏳ Загрузка курсов...</div>';
+    try {
+        const response = await fetch('https://77.239.122.8.nip.io/api/rates');
+        if (!response.ok) throw new Error('Ошибка сети');
+        const data = await response.json();
+        const rates = data.rates || [];
+        if (rates.length === 0) {
+            container.innerHTML = '<div class="error-msg">Нет данных о курсах</div>';
+            return;
         }
+
+        // Группировка по источнику
+        const grouped = {};
+        for (const rate of rates) {
+            const source = rate.source || 'other';
+            if (!grouped[source]) grouped[source] = [];
+            grouped[source].push(rate);
+        }
+
+        // Порядок источников для красивой сортировки
+        const order = ['MoscowExchange', 'SPBExchange', 'Rapira', 'Binance', 'Bybit', 'Investing', 'Forex', 'CBR', 'other'];
+        const sortedSources = Object.keys(grouped).sort((a, b) => {
+            const ia = order.indexOf(a);
+            const ib = order.indexOf(b);
+            if (ia === -1 && ib === -1) return a.localeCompare(b);
+            if (ia === -1) return 1;
+            if (ib === -1) return -1;
+            return ia - ib;
+        });
+
+        // Маппинг источников → иконки, названия, отображение
+        const sourceMeta = {
+            'MoscowExchange': { icon: 'fas fa-building', name: 'Москва', color: '#ffb86c' },
+            'SPBExchange': { icon: 'fas fa-building', name: 'Санкт-Петербург', color: '#ffb86c' },
+            'Rapira': { icon: 'fas fa-bolt', name: 'Rapira', color: '#4caf50' },
+            'Binance': { icon: 'fab fa-bitcoin', name: 'Binance', color: '#f0b90b' },
+            'Bybit': { icon: 'fas fa-chart-line', name: 'Bybit', color: '#3e9eff' },
+            'Investing': { icon: 'fas fa-chart-simple', name: 'Investing', color: '#6c5ce7' },
+            'Forex': { icon: 'fas fa-dollar-sign', name: 'Forex', color: '#00b894' },
+            'CBR': { icon: 'fas fa-university', name: 'ЦБ РФ', color: '#e17055' },
+            'other': { icon: 'fas fa-database', name: 'Другие', color: '#95a5a6' }
+        };
+
+        // Форматирование значения для разных валютных пар
+        function formatRateValue(pair, value) {
+            if (value === null || value === undefined) return 'N/A';
+            const num = Number(value);
+            if (pair === 'BTC/USDT') return `${Math.round(num)} ₮`;
+            if (pair === 'ETH/USDT') return `${Math.round(num)} ₮`;
+            if (pair === 'USDT/RUB') return `${num.toFixed(2)} ₽`;
+            if (pair.endsWith('/RUB')) return `${num.toFixed(2)} ₽`;
+            if (pair.endsWith('/USD') || pair === 'EUR/USD') return `${num.toFixed(4)} $`;
+            return num.toFixed(4);
+        }
+
+        // Генерация карточек
+        let cardsHtml = '';
+        for (const source of sortedSources) {
+            const items = grouped[source];
+            if (!items.length) continue;
+            const meta = sourceMeta[source] || sourceMeta['other'];
+            const iconHtml = meta.icon ? `<i class="${meta.icon}"></i>` : '<i class="fas fa-chart-line"></i>';
+            let rowsHtml = '';
+            // Специальная группировка для ЦБ РФ (показываем несколько пар в строку)
+            if (source === 'CBR') {
+                // ЦБ выдаёт много пар: USD/RUB, EUR/RUB, CNY/RUB, AED/RUB, KZT/RUB, TRY/RUB, GBP/RUB, JPY/RUB, CHF/RUB, CAD/RUB
+                const cbrPairs = items.filter(i => i.pair && i.value);
+                if (cbrPairs.length) {
+                    rowsHtml = '<div class="rate-row"><div class="rate-name">Основные валюты</div><div class="rate-value">';
+                    const mainCurrencies = ['USD/RUB', 'EUR/RUB', 'CNY/RUB'];
+                    const mainValues = cbrPairs.filter(p => mainCurrencies.includes(p.pair)).map(p => formatRateValue(p.pair, p.value));
+                    rowsHtml += mainValues.join(' · ');
+                    rowsHtml += '</div></div>';
+                    const otherCurrencies = cbrPairs.filter(p => !mainCurrencies.includes(p.pair));
+                    if (otherCurrencies.length) {
+                        rowsHtml += '<div class="rate-row"><div class="rate-name">Прочие</div><div class="rate-value">';
+                        rowsHtml += otherCurrencies.map(p => `${p.pair.split('/')[0]} ${formatRateValue(p.pair, p.value)}`).join(' · ');
+                        rowsHtml += '</div></div>';
+                    }
+                } else {
+                    rowsHtml = '<div class="rate-row">Нет данных</div>';
+                }
+            } else {
+                // Обычное отображение каждой пары в отдельной строке
+                for (const rate of items) {
+                    if (!rate.pair) continue;
+                    let pairDisplay = rate.pair;
+                    // Улучшаем отображение пар
+                    pairDisplay = pairDisplay.replace('USD/RUB', '$/₽').replace('EUR/RUB', '€/₽').replace('CNY/RUB', '¥/₽')
+                                             .replace('BTC/USDT', '₿/₮').replace('ETH/USDT', 'Ξ/₮');
+                    const valueDisplay = formatRateValue(rate.pair, rate.value);
+                    rowsHtml += `
+                        <div class="rate-row">
+                            <div class="rate-name">${pairDisplay}</div>
+                            <div class="rate-value">${valueDisplay}</div>
+                        </div>
+                    `;
+                }
+            }
+            cardsHtml += `
+                <div class="rate-card">
+                    <div class="card-header">
+                        ${iconHtml}
+                        <h3>${meta.name}</h3>
+                    </div>
+                    ${rowsHtml}
+                </div>
+            `;
+        }
+
+        container.innerHTML = cardsHtml;
+    } catch (err) {
+        console.error('Ошибка загрузки курсов:', err);
+        container.innerHTML = '<div class="error-msg">❌ Не удалось загрузить курсы. Попробуйте позже.</div>';
     }
-    loadRates();
+}
 
     // Простой escape для безопасности
     function escapeHtml(str) {
